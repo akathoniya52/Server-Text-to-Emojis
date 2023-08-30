@@ -4,7 +4,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const textSchema = require("./models");
 require("dotenv").config();
-
+const PORT = 9000;
 const app = express();
 
 app.use(bodyParser.json());
@@ -76,6 +76,6 @@ app.post("/", function (req, res) {
   });
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server Started : ${process.env.PORT}`);
+app.listen(PORT, () => {
+  console.log(`Server Started : ${PORT}`);
 });
