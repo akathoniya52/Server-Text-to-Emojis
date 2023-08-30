@@ -4,26 +4,38 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const textSchema = require("./models");
 require("dotenv").config();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const app = express();
 
+// middlewares
+mongoose.set("strictQuery", false);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 
 // database connection
 async function ConnectToMongoDb() {
-  const res = await mongoose
-    .connect("mongodb+srv://akathoniya52:amit@cluster0.pnrfb8h.mongodb.net/")
-    .then(() => {
-      console.log("Database Connected..!");
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+  try {
+    const res = await mongoose
+      .connect(process.env.URI)
+      .then((res) => {
+        console.log("Database Connected..!", res.connection.host);
+      })
+      .catch((err) => {
+        console.log(err);
+        process.exit(1);
+      });
+  } catch (error) {
+    console.log(error);
+    process.exit(1);
+  }
 }
 
-ConnectToMongoDb();
+ConnectToMongoDb().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server Started : ${PORT}`);
+  });
+});
 
 // get the data from the database
 app.get("/", async (req, res) => {
@@ -74,8 +86,4 @@ app.post("/", function (req, res) {
     // console.log(val.emoji);
     res.json({ msg: "Data Added Successfully", emojis: val.emoji });
   });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server Started : ${PORT}`);
 });
