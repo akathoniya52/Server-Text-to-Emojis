@@ -3,9 +3,9 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const textSchema = require("./models");
+require("dotenv").config();
 
 const app = express();
-const PORT = 9000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -14,7 +14,7 @@ app.use(cors());
 // database connection
 async function ConnectToMongoDb() {
   const res = await mongoose
-    .connect("mongodb+srv://akathoniya52:amit@cluster0.pnrfb8h.mongodb.net/")
+    .connect(process.env.URI)
     .then(() => {
       console.log("Database Connected..!");
     })
@@ -32,7 +32,7 @@ app.get("/", async (req, res) => {
 
   // emojis to text
   let emojisText = "";
-  var str = emoji.split(" ");
+  let str = emoji.split(" ");
 
   str.forEach((element) => {
     console.log("Elements ", element);
@@ -43,11 +43,11 @@ app.get("/", async (req, res) => {
   const data = await textSchema
     .find({ emoji: emojisText } && { pass: pass })
     .then((data) => {
-      console.log(data);
+      // console.log(data);
       return res.json({ message: "success", txt: data[0].text });
     })
     .catch((err) => {
-      console.log(err);
+      // console.log(err);
       return res.json({ message: "Try again" });
     });
 });
@@ -71,11 +71,11 @@ app.post("/", function (req, res) {
   });
 
   txt.save().then((val) => {
-    console.log(val.emoji);
+    // console.log(val.emoji);
     res.json({ msg: "Data Added Successfully", emojis: val.emoji });
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server Started : ${PORT}`);
+app.listen(process.env.PORT, () => {
+  console.log(`Server Started : ${process.env.PORT}`);
 });
