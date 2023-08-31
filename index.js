@@ -37,36 +37,36 @@ ConnectToMongoDb().then(() => {
   });
 });
 
-// get the data from the database
-app.get("/", async (req, res) => {
-  const { emoji, pass } = req.body;
-  console.log(emoji);
+app.get("/emoji", async (req, res) => {
+  const { emojis, pass } = req.query;
+  console.log(emojis, pass);
 
-  // emojis to text
+  // // emojis to text
   let emojisText = "";
-  let str = emoji.split(" ");
+  let str = emojis.split(" ");
 
   str.forEach((element) => {
-    console.log("Elements ", element);
     emojisText += `&#${element.codePointAt(0)} `;
-    console.log(emojisText);
   });
 
-  const data = await textSchema
-    .find({ emoji: emojisText } && { pass: pass })
-    .then((data) => {
-      // console.log(data);
-      return res.json({ message: "success", txt: data[0].text });
-    })
-    .catch((err) => {
-      // console.log(err);
-      return res.json({ message: "Try again" });
-    });
+  try {
+    await textSchema
+      .find({ emoji: emojisText, pass: pass })
+      .then((data) => {
+        return res.json({ message: "success", data: data });
+      })
+      .catch((err) => {
+        return res.json({ message: "Try again" });
+      });
+  } catch (error) {
+    return res.json({ error: error });
+  }
 });
 
 // add the text for the emojis
 app.post("/", function (req, res) {
   const { text, pass } = req.body;
+  console.log(req.body);
 
   // create the emojis from the texts
   let emojis = "";
@@ -75,15 +75,17 @@ app.post("/", function (req, res) {
     emojis += `&#128${element.charCodeAt()} `;
   });
 
-  // console.log(str);
-  const txt = new textSchema({
-    text: text,
-    pass: pass,
-    emoji: emojis,
-  });
+  try {
+    const txt = new textSchema({
+      text: text,
+      pass: pass,
+      emoji: emojis,
+    });
 
-  txt.save().then((val) => {
-    // console.log(val.emoji);
-    res.json({ msg: "Data Added Successfully", emojis: val.emoji });
-  });
+    txt.save().then((val) => {
+      return res.json({ msg: "Data Added Successfully", emojis: val.emoji });
+    });
+  } catch (error) {
+    return res.json({ error: error });
+  }
 });
